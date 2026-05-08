@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>마음의 실타래</title>
+    <title>마음의 실타래 - MANNAJA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <style>
-        /* 모바일에 맞춰 카드 사이즈 살짝 축소 */
+    <script src="config.js"></script> <style>
+        /* 모바일에 맞춰 카드 사이즈 축소 및 비율 조정 */
         .card-slot {
             width: 55px; height: 80px;
             border: 2px dashed #cbd5e1; border-radius: 0.75rem;
@@ -73,7 +72,7 @@
             
             <div class="flex justify-between items-start mb-4 flex-shrink-0">
                 <div>
-                    <h1 class="text-xl md:text-3xl font-black text-indigo-600 tracking-tighter cursor-pointer" onclick="location.reload()">마음의 실타래</h1>
+                    <h1 class="text-xl md:text-3xl font-black text-indigo-600 tracking-tighter cursor-pointer" onclick="location.reload()">MANNAJA</h1>
                     <p id="room-info-display" class="text-[10px] md:text-xs text-slate-400 font-bold uppercase mt-0.5"></p>
                 </div>
                 
@@ -141,9 +140,14 @@
 
                 <div class="flex-shrink-0 bg-white pt-3 border-t border-slate-100 flex items-center gap-3">
                     
-                    <div id="my-secret-area" class="flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl px-4 py-2 min-w-[70px] md:min-w-[100px]">
-                        <span class="text-[8px] md:text-[10px] font-bold text-slate-400">내 숫자</span>
-                        <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600">?</span>
+                    <div id="my-secret-area" ontouchstart="" class="group relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer select-none overflow-hidden transition-all shadow-inner">
+                        <span class="text-[8px] md:text-[10px] font-bold text-slate-400 mb-0.5">내 숫자</span>
+                        <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100">?</span>
+
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 transition-opacity duration-200 group-hover:opacity-0 group-active:opacity-0">
+                            <span class="text-xl md:text-2xl">👀</span>
+                            <span class="text-[8px] md:text-[9px] font-black text-slate-500 mt-1 tracking-widest">눌러서 확인</span>
+                        </div>
                     </div>
 
                     <div class="flex-1">
@@ -300,7 +304,7 @@
 
         function renderUI() {
             document.getElementById('room-info-display').innerText = `${state.roomData.room_name} | CODE: ${state.roomCode}`;
-            document.getElementById('display-theme').innerText = state.roomData.current_theme || "시작 버튼을 누르면 주제가 공개됩니다!";
+            document.getElementById('display-theme').innerText = state.roomData.current_theme || "방장이 시작 버튼을 누르면 주제가 공개됩니다!";
             
             document.getElementById('player-list').innerHTML = state.players.map(p => `
                 <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-lg border border-slate-200">
@@ -310,7 +314,7 @@
                 </div>
             `).join('');
 
-            // ★수정 1: 카드 슬롯 내 도트 겹침 현상 해결 (그리드 정렬)
+            // 카드 슬롯 로직 (도트 겹침 방지 및 그리드 정렬 포함)
             const slotsCount = state.players.length;
             const slotsContainer = document.getElementById('card-slots');
             slotsContainer.innerHTML = "";
@@ -320,21 +324,16 @@
                 slot.className = "card-slot";
                 slot.onclick = () => selectSlot(i);
                 
-                // 해당 슬롯에 배치한 모든 플레이어 찾기
                 const occupiers = state.players.filter(p => p.selected_slot === i);
                 
                 if(occupiers.length > 0) {
                     if(state.roomData.status === 'revealed') {
-                        // 결과 공개 시 (첫 번째 사람 정보 표시 - 룰상 중복 배치 불가하므로 1명)
                         const occupier = occupiers[0];
                         slot.classList.add('revealed-card');
                         slot.innerHTML = `<div class="text-xl md:text-2xl font-black text-slate-800">${occupier.secret_number}</div><div class="text-[8px] font-bold mt-1 text-center truncate w-full px-1" style="color: ${occupier.color}">${occupier.user_name}</div>`;
                     } else {
-                        // 결과 공개 전 (도트 여러 개 그리드 정렬)
                         slot.innerHTML = `<span class="text-[10px] font-black text-slate-200 absolute top-1 left-1.5">${i}</span>`;
-                        
                         const dotContainer = document.createElement('div');
-                        // flex-wrap을 적용하여 가로폭을 넘어가면 자동으로 아랫줄에 배치되게 함
                         dotContainer.className = "flex flex-wrap justify-center content-center gap-1 w-full px-1 h-full pt-3"; 
                         
                         occupiers.forEach(occ => {
@@ -352,7 +351,6 @@
             }
 
             document.getElementById('my-number').innerText = state.myPlayerInfo?.secret_number || "?";
-            document.getElementById('my-number').classList.toggle('text-indigo-600', !!state.myPlayerInfo?.secret_number);
 
             const isAllPlaced = state.players.every(p => p.selected_slot != null);
             const isAllReady = state.players.every(p => p.is_ready) && state.players.length > 1;
@@ -369,7 +367,7 @@
             if(state.myPlayerInfo?.is_ready) btnReady.classList.replace('bg-slate-800', 'bg-orange-500');
             else btnReady.classList.replace('bg-orange-500', 'bg-slate-800');
 
-            // ★수정 2: 스킵 방지. '결과 공개' 상태로 방금 진입했다면 2초간 딜레이 부여
+            // 스킵 방지: 2초 딜레이
             const btnNext = document.getElementById('btn-next');
             if (state.roomData.status === 'revealed' && prevStatus === 'playing') {
                 btnNext.disabled = true;
@@ -380,20 +378,18 @@
                     btnNext.disabled = false;
                     btnNext.innerText = "다음 라운드 시작";
                     btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
-                }, 2000); // 2초 딜레이
+                }, 2000);
             } else if (state.roomData.status === 'revealed') {
                 btnNext.disabled = false;
                 btnNext.innerText = "다음 라운드 시작";
                 btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
             }
             
-            // 상태 업데이트 트리거
             if(state.roomData.status === 'playing' && isAllReady) updateRoomStatus('revealed');
-            
-            // 현재 상태 저장
             prevStatus = state.roomData.status;
         }
 
+        // --- 게임 액션 함수들 ---
         async function startGame() {
             const { data: themes } = await supabaseClient.from('game_themes').select('content');
             const theme = (themes && themes.length) ? themes[Math.floor(Math.random() * themes.length)].content : "우리가 함께 가고 싶은 여행지는?";
@@ -401,7 +397,7 @@
             
             showLoading(true);
             const { error: roomError } = await supabaseClient.from('game_rooms').update({ current_theme: theme, status: 'playing' }).eq('room_code', state.roomCode);
-            if(roomError) { showLoading(false); return showToast("권한이 없습니다."); }
+            if (roomError) { showLoading(false); return showToast("권한이 없습니다."); }
             
             let isSuccess = true;
             for(let i=0; i < state.players.length; i++) {
@@ -440,31 +436,9 @@
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
         function closeRoomManage() { document.getElementById('modal-room-manage').classList.add('hidden'); }
         async function handleShareRoom() { 
-            const t = `마음의 실타래 : ${window.location.href}\n방 이름 : ${state.roomData.room_name}\n초대코드 : ${state.roomCode}`;
-            
-            try {
-                // 현재 접속한 기기가 모바일인지 확인
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                
-                // 모바일 기기이면서 공유 API를 지원할 때만 시스템 공유창 띄우기
-                if (isMobile && navigator.share) {
-                    await navigator.share({ text: t }); 
-                } 
-                // PC 환경이거나 공유 API가 없으면 바로 클립보드로 복사
-                else { 
-                    await navigator.clipboard.writeText(t); 
-                    showToast("초대 문구가 복사되었습니다!"); 
-                }
-            } catch (error) {
-                // 모바일에서 공유창이 떴다가 취소 버튼을 누르거나 알 수 없는 에러가 발생해도
-                // 안전하게 클립보드에 복사해 주는 폴백(Fallback) 방어 로직
-                try {
-                    await navigator.clipboard.writeText(t);
-                    showToast("초대 문구가 복사되었습니다!");
-                } catch (err) {
-                    console.error("복사 실패:", err);
-                }
-            }
+            const t = `[마음의 실타래] 게임 초대\n방: ${state.roomData.room_name}\n코드: ${state.roomCode}\n접속: ${window.location.href}`;
+            if(navigator.share) await navigator.share({ text: t, url: window.location.href });
+            else { await navigator.clipboard.writeText(t); showToast("초대 복사 완료!"); }
             closeRoomManage();
         }
         function openRenameModal() { closeRoomManage(); const n = prompt("새로운 방 이름을 입력하세요.", state.roomData.room_name); if(n) handleRenameRoom(n); }
