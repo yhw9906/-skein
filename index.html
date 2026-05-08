@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script> <style>
-        /* 모바일에 맞춰 카드 사이즈 축소 및 비율 조정 */
         .card-slot {
             width: 55px; height: 80px;
             border: 2px dashed #cbd5e1; border-radius: 0.75rem;
@@ -18,7 +17,6 @@
         @media (min-width: 768px) { .card-slot { width: 85px; height: 115px; } }
         .card-slot:hover { border-color: #6366f1; background-color: #f8fafc; }
         
-        /* 도트 크기를 약간 줄이고 줄바꿈(flex-wrap) 적용 시 깔끔하게 배치되도록 수정 */
         .player-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0; }
         @media (min-width: 768px) { .player-dot { width: 14px; height: 14px; } }
         
@@ -37,9 +35,8 @@
             <h2 class="font-black text-lg mb-4 text-center text-indigo-600">방 관리</h2>
             <button onclick="handleShareRoom()" class="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-bold">🔗 초대 링크 복사</button>
             <button onclick="openRenameModal()" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-bold">✏️ 방 이름 변경</button>
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <button onclick="confirmLeaveRoom()" class="py-4 bg-orange-50 text-orange-600 rounded-2xl font-bold text-sm">🚪 방 나가기</button>
-                <button onclick="confirmDeleteRoom()" class="py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm">🗑️ 방 삭제</button>
+            <div class="pt-2">
+                <button onclick="confirmDeleteRoom()" class="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm">🗑️ 방 영구 삭제 (폭파)</button>
             </div>
             <button onclick="closeRoomManage()" class="w-full py-3 text-slate-400 font-bold mt-2">닫기</button>
         </div>
@@ -76,12 +73,16 @@
                     <p id="room-info-display" class="text-[10px] md:text-xs text-slate-400 font-bold uppercase mt-0.5"></p>
                 </div>
                 
-                <div class="flex gap-2">
-                    <button id="btn-restart" onclick="confirmRestartGame()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1" title="강제 재시작">
+                <div class="flex gap-1.5 md:gap-2">
+                    <button id="btn-leave" onclick="confirmLeaveRoom()" class="hidden bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1" title="방 나가기">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <span class="hidden md:inline">나가기</span>
+                    </button>
+                    <button id="btn-restart" onclick="confirmRestartGame()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1" title="강제 재시작">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                         <span class="hidden md:inline">초기화</span>
                     </button>
-                    <button id="btn-manage" onclick="openRoomManage()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center">방 관리</button>
+                    <button id="btn-manage" onclick="openRoomManage()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 px-3 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center">방 관리</button>
                 </div>
             </div>
 
@@ -141,10 +142,12 @@
                 <div class="flex-shrink-0 bg-white pt-3 border-t border-slate-100 flex items-center gap-3">
                     
                     <div id="my-secret-area" 
-                         onmouseenter="showSecret()" onmouseleave="hideSecret()"
-                         ontouchstart="showSecret()" ontouchend="hideSecretDelay()"
+                         onpointerdown="showSecret()" 
+                         onpointerup="hideSecretDelay()"
+                         onpointerleave="hideSecret()"
                          oncontextmenu="event.preventDefault();"
-                         class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer select-none overflow-hidden transition-all shadow-inner">
+                         style="touch-action: none; -webkit-user-select: none; user-select: none;"
+                         class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer overflow-hidden transition-all shadow-inner">
                         
                         <span class="text-[8px] md:text-[10px] font-bold text-slate-400 mb-0.5">내 숫자</span>
                         <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 transition-opacity duration-200" style="opacity: 0;">?</span>
@@ -201,6 +204,7 @@
                 document.getElementById('side-panel').classList.add('hidden');
                 document.getElementById('btn-manage').classList.add('hidden');
                 document.getElementById('btn-restart').classList.add('hidden');
+                document.getElementById('btn-leave').classList.add('hidden'); // 나가기 버튼 숨김
                 document.getElementById('room-info-display').innerText = "";
             }
         }
@@ -286,8 +290,11 @@
             switchScreen('screen-game');
             document.getElementById('screen-game').classList.add('flex');
             document.getElementById('side-panel').classList.remove('hidden');
+            
+            // 컨트롤 버튼 보이기 (나가기 버튼 포함)
             document.getElementById('btn-manage').classList.remove('hidden');
             document.getElementById('btn-restart').classList.remove('hidden');
+            document.getElementById('btn-leave').classList.remove('hidden');
             
             supabaseClient.channel('room_' + code)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: `room_code=eq.${code}` }, refreshGame)
@@ -435,6 +442,7 @@
             box.appendChild(d); box.scrollTop = box.scrollHeight;
         }
 
+        // --- 방 관리 및 모달 ---
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
         function closeRoomManage() { document.getElementById('modal-room-manage').classList.add('hidden'); }
         async function handleShareRoom() { 
@@ -445,12 +453,14 @@
         }
         function openRenameModal() { closeRoomManage(); const n = prompt("새로운 방 이름을 입력하세요.", state.roomData.room_name); if(n) handleRenameRoom(n); }
         async function handleRenameRoom(n) { await supabaseClient.from('game_rooms').update({ room_name: n }).eq('room_code', state.roomCode); showToast("이름 변경 완료"); }
-        function confirmLeaveRoom() { closeRoomManage(); openConfirmModal("방에서 나가시겠습니까?", async () => { await supabaseClient.from('game_players').delete().eq('room_code', state.roomCode).eq('user_id', state.user.id); location.reload(); }); }
+        
+        function confirmLeaveRoom() { closeRoomManage(); openConfirmModal("방에서 완전히 나가시겠습니까?\n(재입장 시 코드가 필요합니다)", async () => { await supabaseClient.from('game_players').delete().eq('room_code', state.roomCode).eq('user_id', state.user.id); location.reload(); }); }
         function confirmDeleteRoom() { closeRoomManage(); openConfirmModal("방을 폭파하시겠습니까?", async () => { await supabaseClient.from('game_rooms').delete().eq('room_code', state.roomCode); location.reload(); }); }
+        
         function openConfirmModal(m, a) { document.getElementById('confirm-message').innerText = m; const b = document.getElementById('btn-confirm-action'); const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.onclick = () => { closeConfirmModal(); a(); }; document.getElementById('modal-confirm').classList.remove('hidden'); }
         function closeConfirmModal() { document.getElementById('modal-confirm').classList.add('hidden'); }
 
-        // --- 숫자 가림막 제어 로직 (모바일 스킵/잔상 방지) ---
+        // --- 숫자 가림막 제어 로직 (Pointer Events 적용) ---
         let secretTimer = null;
         
         function showSecret() {
@@ -461,6 +471,7 @@
         }
         
         function hideSecret() {
+            clearTimeout(secretTimer); // 중복 실행 방지
             const num = document.getElementById('my-number');
             const cover = document.getElementById('secret-cover');
             if(num && cover) { num.style.opacity = '0'; cover.style.opacity = '1'; }
@@ -468,6 +479,7 @@
         
         function hideSecretDelay() {
             clearTimeout(secretTimer);
+            // 터치를 떼면 무조건 2초 뒤에 가려짐
             secretTimer = setTimeout(hideSecret, 2000); 
         }
     </script>
