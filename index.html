@@ -6,7 +6,8 @@
     <title>마음의 실타래</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script> <style>
+    <script src="config.js"></script>
+    <style>
         .card-slot {
             width: 55px; height: 80px;
             border: 2px dashed #cbd5e1; border-radius: 0.75rem;
@@ -33,16 +34,25 @@
     <div id="modal-room-manage" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[200] p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-3">
             <h2 class="font-black text-lg mb-4 text-center text-indigo-600">방 관리</h2>
+            <button onclick="openMemberManage()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-100">👥 멤버 관리 / 내보내기</button>
             <button onclick="handleShareRoom()" class="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-bold">🔗 초대 링크 복사</button>
             <button onclick="openRenameModal()" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-bold">✏️ 방 이름 변경</button>
-            <div class="pt-2">
+            <div class="pt-2 border-t mt-2">
                 <button onclick="confirmDeleteRoom()" class="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm">🗑️ 방 영구 삭제 (폭파)</button>
             </div>
             <button onclick="closeRoomManage()" class="w-full py-3 text-slate-400 font-bold mt-2">닫기</button>
         </div>
     </div>
 
-    <div id="modal-rename" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[210] p-4">
+    <div id="modal-member-list" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[210] p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+            <h2 class="font-black text-lg mb-4 text-center">멤버 관리</h2>
+            <div id="member-manage-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar mb-6 px-1"></div>
+            <button onclick="closeMemberManage()" class="w-full py-3 bg-slate-100 text-slate-400 rounded-2xl font-bold">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-rename" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[220] p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
             <h2 class="font-black text-lg mb-4">방 이름 변경</h2>
             <input type="text" id="renameInput" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none font-bold mb-4">
@@ -53,7 +63,7 @@
         </div>
     </div>
 
-    <div id="modal-confirm" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[220] p-4">
+    <div id="modal-confirm" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[230] p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center">
             <p id="confirm-message" class="mb-6 font-bold text-slate-700 whitespace-pre-line"></p>
             <div class="flex gap-2">
@@ -64,29 +74,26 @@
     </div>
 
     <div class="w-full max-w-5xl bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[100dvh] md:h-[800px]">
-        
         <div class="flex-1 p-4 md:p-6 flex flex-col relative overflow-hidden bg-white h-[55%] md:h-full">
-            
             <div class="flex justify-between items-start mb-4 flex-shrink-0">
                 <div>
                     <h1 class="text-xl md:text-3xl font-black text-indigo-600 tracking-tighter cursor-pointer" onclick="location.reload()">마음의 실타래</h1>
                     <p id="room-info-display" class="text-[10px] md:text-xs text-slate-400 font-bold uppercase mt-0.5"></p>
                 </div>
-                
                 <div class="flex gap-1.5 md:gap-2">
-                    <button id="btn-leave" onclick="confirmLeaveRoom()" class="hidden bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1" title="방 나가기">
+                    <button id="btn-leave" onclick="confirmLeaveRoom()" class="hidden bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                         <span class="hidden md:inline">나가기</span>
                     </button>
-                    <button id="btn-restart" onclick="confirmRestartGame()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1" title="강제 재시작">
+                    <button id="btn-restart" onclick="confirmRestartGame()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                         <span class="hidden md:inline">초기화</span>
                     </button>
-                    <button id="btn-manage" onclick="openRoomManage()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 px-3 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center">방 관리</button>
+                    <button id="btn-manage" onclick="openRoomManage()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 px-3 py-2 rounded-xl text-xs font-bold transition-colors">방 관리</button>
                 </div>
             </div>
 
-            <div id="screen-auth" class="space-y-6 my-auto max-w-sm mx-auto w-full overflow-y-auto no-scrollbar pb-10">
+            <div id="screen-auth" class="hidden space-y-6 my-auto max-w-sm mx-auto w-full overflow-y-auto no-scrollbar pb-10">
                 <div class="text-center space-y-2">
                     <h2 class="text-xl font-black text-slate-800">환영합니다!</h2>
                     <p class="text-xs text-slate-400 font-bold">게임을 즐기려면 로그인 해주세요.</p>
@@ -107,10 +114,17 @@
                     <span id="user-display" class="font-bold text-indigo-600"></span>
                     <button onclick="handleLogout()" class="text-xs text-slate-400 font-bold underline">로그아웃</button>
                 </div>
+                
                 <div>
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">참여 중인 게임</h3>
                     <div id="my-game-list" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar pb-2"></div>
                 </div>
+
+                <div>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 border-t pt-4">게임 히스토리 (나간 방)</h3>
+                    <div id="my-history-list" class="space-y-2 max-h-32 overflow-y-auto no-scrollbar pb-2"></div>
+                </div>
+
                 <div class="space-y-3 pt-4 border-t">
                     <input type="text" id="roomName" placeholder="새 게임 이름" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none font-bold">
                     <button onclick="createRoom()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100">새 게임 만들기</button>
@@ -128,19 +142,15 @@
             </div>
 
             <div id="screen-game" class="hidden flex-col h-full overflow-hidden w-full max-w-2xl mx-auto">
-                
                 <div class="bg-indigo-600 text-white p-4 md:p-6 rounded-2xl mb-3 shadow-md flex-shrink-0 relative overflow-hidden">
                     <p class="text-[9px] md:text-[10px] font-bold opacity-70 mb-0.5 uppercase tracking-widest">라운드 주제</p>
                     <h2 id="display-theme" class="text-base md:text-xl font-black leading-tight break-keep">대기 중...</h2>
                     <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white opacity-10 rounded-full"></div>
                 </div>
-
                 <div class="flex-1 overflow-y-auto no-scrollbar pb-2 w-full">
                     <div id="card-slots" class="flex flex-wrap justify-center gap-2 md:gap-4 px-1"></div>
                 </div>
-
                 <div class="flex-shrink-0 bg-white pt-3 border-t border-slate-100 flex items-center gap-3">
-                    
                     <div id="my-secret-area" 
                          onpointerdown="showSecret()" 
                          onpointerup="hideSecretDelay()"
@@ -148,16 +158,13 @@
                          oncontextmenu="event.preventDefault();"
                          style="touch-action: none; -webkit-user-select: none; user-select: none;"
                          class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer overflow-hidden transition-all shadow-inner">
-                        
                         <span class="text-[8px] md:text-[10px] font-bold text-slate-400 mb-0.5">내 숫자</span>
                         <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 transition-opacity duration-200" style="opacity: 0;">?</span>
-
                         <div id="secret-cover" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 transition-opacity duration-200" style="opacity: 1;">
                             <span class="text-xl md:text-2xl">👀</span>
                             <span class="text-[8px] md:text-[9px] font-black text-slate-500 mt-1 tracking-widest">눌러서 확인</span>
                         </div>
                     </div>
-
                     <div class="flex-1">
                         <button id="btn-start" onclick="startGame()" class="w-full bg-indigo-600 text-white py-4 md:py-5 rounded-xl font-black shadow-md hidden">게임 시작</button>
                         <button id="btn-ready" onclick="toggleReady()" class="w-full bg-slate-800 text-white py-4 md:py-5 rounded-xl font-black shadow-md hidden transition-all duration-200">카드 배치 확정</button>
@@ -188,7 +195,8 @@
         const supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         const COLORS = ["#EF4444", "#F97316", "#F59E0B", "#10B981", "#14B8A6", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899", "#64748B"];
         const state = { user: null, roomCode: null, roomData: null, players: [], myPlayerInfo: null };
-        let prevStatus = null; 
+        let prevStatus = null;
+        let secretTimer = null;
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -204,12 +212,11 @@
                 document.getElementById('side-panel').classList.add('hidden');
                 document.getElementById('btn-manage').classList.add('hidden');
                 document.getElementById('btn-restart').classList.add('hidden');
-                document.getElementById('btn-leave').classList.add('hidden'); // 나가기 버튼 숨김
+                document.getElementById('btn-leave').classList.add('hidden');
                 document.getElementById('room-info-display').innerText = "";
             }
         }
 
-        // --- 초기화 및 인증 ---
         window.onload = async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
@@ -239,17 +246,33 @@
         }
         async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
-        // --- 대시보드 ---
-        async function loadMyGames() {
-            const { data } = await supabaseClient.from('game_players').select(`room_code, game_rooms ( room_name )`).eq('user_id', state.user.id);
-            const list = document.getElementById('my-game-list');
-            if(!data || data.length === 0) { list.innerHTML = `<p class="text-center py-6 text-xs text-slate-300 font-bold bg-slate-50 rounded-2xl">참여 중인 게임이 없습니다.</p>`; return; }
-            list.innerHTML = data.map(i => `
-                <div onclick="enterGame('${i.room_code}')" class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center cursor-pointer hover:border-indigo-500 shadow-sm transition-all group">
-                    <div><h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600">${i.game_rooms.room_name}</h4><p class="text-[9px] font-black text-slate-300 uppercase">${i.room_code}</p></div>
-                    <span class="text-indigo-200 group-hover:text-indigo-600 font-black">➔</span>
+        // --- 대시보드 리스트 생성 ---
+        function createGameListItem(i, isActive) {
+            return `
+                <div onclick="joinRoom('${i.room_code}')" class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center cursor-pointer hover:border-indigo-500 shadow-sm transition-all group ${isActive ? '' : 'opacity-60'}">
+                    <div>
+                        <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 flex items-center gap-1.5">
+                            ${i.game_rooms.room_name}
+                            ${!isActive ? '<span class="text-[8px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-black">나감</span>' : ''}
+                        </h4>
+                        <p class="text-[9px] font-black text-slate-300 uppercase mt-0.5">CODE: ${i.room_code}</p>
+                    </div>
+                    <span class="text-indigo-200 group-hover:text-indigo-600 font-black text-xs">${isActive ? '➔ 입장' : '↺ 재입장'}</span>
                 </div>
-            `).join('');
+            `;
+        }
+
+        async function loadMyGames() {
+            const { data } = await supabaseClient.from('game_players').select(`room_code, is_active, game_rooms ( room_name )`).eq('user_id', state.user.id);
+            const activeList = document.getElementById('my-game-list');
+            const historyList = document.getElementById('my-history-list');
+            
+            const validData = data ? data.filter(i => i.game_rooms !== null) : []; // 폭파된 방 제외
+            const activeData = validData.filter(i => i.is_active !== false); // true 거나 null(과거데이터)인 경우
+            const historyData = validData.filter(i => i.is_active === false);
+
+            activeList.innerHTML = activeData.length ? activeData.map(i => createGameListItem(i, true)).join('') : `<p class="text-center py-5 text-xs text-slate-300 font-bold bg-slate-50 rounded-2xl">참여 중인 게임이 없습니다.</p>`;
+            historyList.innerHTML = historyData.length ? historyData.map(i => createGameListItem(i, false)).join('') : `<p class="text-center py-3 text-xs text-slate-300 font-bold bg-slate-50 rounded-2xl">히스토리가 없습니다.</p>`;
         }
 
         async function createRoom() {
@@ -260,18 +283,27 @@
             state.roomCode = code; showColorSelect();
         }
 
-        async function joinRoom() {
-            const code = document.getElementById('joinCode').value.trim().toUpperCase();
+        // 재입장 및 신규 입장 통합 처리
+        async function joinRoom(targetCode) {
+            const code = (typeof targetCode === 'string' ? targetCode : document.getElementById('joinCode').value.trim()).toUpperCase();
             if(!code) return;
+            
             const { data: exists } = await supabaseClient.from('game_players').select('*').eq('room_code', code).eq('user_id', state.user.id).single();
-            if(exists) return enterGame(code);
+            if(exists) {
+                if(exists.is_active === false) {
+                    // 나갔던 방에 재입장 시 is_active를 다시 true로 업데이트
+                    await supabaseClient.from('game_players').update({ is_active: true }).eq('room_code', code).eq('user_id', state.user.id);
+                }
+                return enterGame(code);
+            }
+            
             const { data: room } = await supabaseClient.from('game_rooms').select('*').eq('room_code', code).single();
             if(!room) return showToast("방을 찾을 수 없습니다.");
             state.roomCode = code; showColorSelect();
         }
 
         async function showColorSelect() {
-            const { data: taken } = await supabaseClient.from('game_players').select('color').eq('room_code', state.roomCode);
+            const { data: taken } = await supabaseClient.from('game_players').select('color').eq('room_code', state.roomCode).eq('is_active', true);
             const takenColors = taken ? taken.map(p => p.color) : [];
             const grid = document.getElementById('color-grid');
             grid.innerHTML = COLORS.map(c => `<button onclick="${takenColors.includes(c) ? '' : `selectColor('${c}')`}" class="w-full aspect-square rounded-2xl transition-all ${takenColors.includes(c) ? 'opacity-10 cursor-not-allowed' : 'hover:scale-110 shadow-md'}" style="background-color: ${c}"></button>`).join('');
@@ -279,19 +311,22 @@
         }
 
         async function selectColor(color) {
-            const { error } = await supabaseClient.from('game_players').insert([{ room_code: state.roomCode, user_id: state.user.id, user_name: state.user.user_metadata.display_name, color: color }]);
+            const { error } = await supabaseClient.from('game_players').insert([{ 
+                room_code: state.roomCode, 
+                user_id: state.user.id, 
+                user_name: state.user.user_metadata.display_name, 
+                color: color,
+                is_active: true // 최초 가입 시 활성화
+            }]);
             if(error) return showToast("다른 색상을 선택하세요.");
             enterGame(state.roomCode);
         }
 
-        // --- 게임 진입 및 로직 ---
         async function enterGame(code) {
             state.roomCode = code;
             switchScreen('screen-game');
             document.getElementById('screen-game').classList.add('flex');
             document.getElementById('side-panel').classList.remove('hidden');
-            
-            // 컨트롤 버튼 보이기 (나가기 버튼 포함)
             document.getElementById('btn-manage').classList.remove('hidden');
             document.getElementById('btn-restart').classList.remove('hidden');
             document.getElementById('btn-leave').classList.remove('hidden');
@@ -308,7 +343,8 @@
         async function refreshGame() {
             const { data: room } = await supabaseClient.from('game_rooms').select('*').eq('room_code', state.roomCode).single();
             if(!room) return location.reload();
-            const { data: players } = await supabaseClient.from('game_players').select('*').eq('room_code', state.roomCode).order('user_name');
+            // 활성화된(참여 중인) 플레이어만 필터링해서 가져옴
+            const { data: players } = await supabaseClient.from('game_players').select('*').eq('room_code', state.roomCode).eq('is_active', true).order('user_name');
             state.roomData = room; state.players = players;
             state.myPlayerInfo = players.find(p => p.user_id === state.user.id);
             renderUI();
@@ -329,14 +365,11 @@
             const slotsCount = state.players.length;
             const slotsContainer = document.getElementById('card-slots');
             slotsContainer.innerHTML = "";
-            
             for(let i=1; i<=slotsCount; i++) {
                 const slot = document.createElement('div');
                 slot.className = "card-slot";
                 slot.onclick = () => selectSlot(i);
-                
                 const occupiers = state.players.filter(p => p.selected_slot === i);
-                
                 if(occupiers.length > 0) {
                     if(state.roomData.status === 'revealed') {
                         const occupier = occupiers[0];
@@ -346,7 +379,6 @@
                         slot.innerHTML = `<span class="text-[10px] font-black text-slate-200 absolute top-1 left-1.5">${i}</span>`;
                         const dotContainer = document.createElement('div');
                         dotContainer.className = "flex flex-wrap justify-center content-center gap-1 w-full px-1 h-full pt-3"; 
-                        
                         occupiers.forEach(occ => {
                             const dot = document.createElement('div');
                             dot.className = "player-dot";
@@ -355,9 +387,7 @@
                         });
                         slot.appendChild(dotContainer);
                     }
-                } else {
-                    slot.innerHTML = `<span class="text-slate-200 font-black text-lg">${i}</span>`;
-                }
+                } else { slot.innerHTML = `<span class="text-slate-200 font-black text-lg">${i}</span>`; }
                 slotsContainer.appendChild(slot);
             }
 
@@ -380,42 +410,26 @@
 
             const btnNext = document.getElementById('btn-next');
             if (state.roomData.status === 'revealed' && prevStatus === 'playing') {
-                btnNext.disabled = true;
-                btnNext.innerText = "결과 확인 중...";
-                btnNext.classList.add('opacity-40', 'cursor-not-allowed');
-                setTimeout(() => {
-                    btnNext.disabled = false;
-                    btnNext.innerText = "다음 라운드 시작";
-                    btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
-                }, 2000);
+                btnNext.disabled = true; btnNext.innerText = "결과 확인 중..."; btnNext.classList.add('opacity-40', 'cursor-not-allowed');
+                setTimeout(() => { btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; btnNext.classList.remove('opacity-40', 'cursor-not-allowed'); }, 2000);
             } else if (state.roomData.status === 'revealed') {
-                btnNext.disabled = false;
-                btnNext.innerText = "다음 라운드 시작";
-                btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
             }
-            
             if(state.roomData.status === 'playing' && isAllReady) updateRoomStatus('revealed');
             prevStatus = state.roomData.status;
         }
 
-        // --- 게임 액션 함수들 ---
         async function startGame() {
             const { data: themes } = await supabaseClient.from('game_themes').select('content');
             const theme = (themes && themes.length) ? themes[Math.floor(Math.random() * themes.length)].content : "우리가 함께 가고 싶은 여행지는?";
             const nums = Array.from({length: 100}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-            
             showLoading(true);
             const { error: roomError } = await supabaseClient.from('game_rooms').update({ current_theme: theme, status: 'playing' }).eq('room_code', state.roomCode);
             if (roomError) { showLoading(false); return showToast("권한이 없습니다."); }
-            
-            let isSuccess = true;
             for(let i=0; i < state.players.length; i++) {
-                const { error } = await supabaseClient.from('game_players').update({ secret_number: nums[i], selected_slot: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', state.players[i].user_id);
-                if (error) isSuccess = false;
+                await supabaseClient.from('game_players').update({ secret_number: nums[i], selected_slot: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', state.players[i].user_id);
             }
-            showLoading(false);
-            if (!isSuccess) showToast("배분 오류 (RLS를 확인하세요)");
-            else await refreshGame();
+            showLoading(false); await refreshGame();
         }
 
         function confirmRestartGame() { openConfirmModal("게임이 초기화 됩니다.\n정말 강제 재시작 하시겠습니까?", handleRestartGame); }
@@ -442,7 +456,40 @@
             box.appendChild(d); box.scrollTop = box.scrollHeight;
         }
 
-        // --- 방 관리 및 모달 ---
+        // --- 멤버 관리 기능 ---
+        function openMemberManage() {
+            closeRoomManage();
+            const list = document.getElementById('member-manage-list');
+            list.innerHTML = state.players.map(p => `
+                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full" style="background-color: ${p.color}"></div>
+                        <span class="font-bold text-slate-700">${p.user_name} ${p.user_id === state.user.id ? '(나)' : ''}</span>
+                    </div>
+                    ${p.user_id !== state.user.id ? 
+                        `<button onclick="confirmKickMember('${p.user_id}', '${p.user_name}')" class="px-3 py-1.5 bg-red-50 text-red-500 rounded-lg text-xs font-bold">내보내기</button>` : 
+                        `<span class="text-[10px] text-slate-300 font-bold uppercase">본인</span>`
+                    }
+                </div>
+            `).join('');
+            document.getElementById('modal-member-list').classList.remove('hidden');
+        }
+        function closeMemberManage() { document.getElementById('modal-member-list').classList.add('hidden'); }
+
+        function confirmKickMember(id, name) {
+            openConfirmModal(`[${name}]님을 정말 내보내시겠습니까?\n인원 변동으로 인해 게임이 즉시 초기화됩니다.`, () => handleKickMember(id));
+        }
+
+        async function handleKickMember(id) {
+            showLoading(true);
+            // 소프트 삭제: is_active 상태를 false로 변경하고 게임 데이터 초기화
+            await supabaseClient.from('game_players').update({ is_active: false, selected_slot: null, secret_number: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', id);
+            await handleRestartGame();
+            showLoading(false);
+            showToast("멤버를 내보내고 게임을 초기화했습니다.");
+            closeMemberManage();
+        }
+
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
         function closeRoomManage() { document.getElementById('modal-room-manage').classList.add('hidden'); }
         async function handleShareRoom() { 
@@ -451,37 +498,31 @@
             else { await navigator.clipboard.writeText(t); showToast("초대 복사 완료!"); }
             closeRoomManage();
         }
-        function openRenameModal() { closeRoomManage(); const n = prompt("새로운 방 이름을 입력하세요.", state.roomData.room_name); if(n) handleRenameRoom(n); }
-        async function handleRenameRoom(n) { await supabaseClient.from('game_rooms').update({ room_name: n }).eq('room_code', state.roomCode); showToast("이름 변경 완료"); }
+        function openRenameModal() { closeRoomManage(); document.getElementById('renameInput').value = state.roomData.room_name; document.getElementById('modal-rename').classList.remove('hidden'); }
+        function closeRenameModal() { document.getElementById('modal-rename').classList.add('hidden'); }
+        async function handleRenameRoom() {
+            const n = document.getElementById('renameInput').value.trim(); if(!n) return;
+            await supabaseClient.from('game_rooms').update({ room_name: n }).eq('room_code', state.roomCode);
+            showToast("이름 변경 완료"); closeRenameModal();
+        }
         
-        function confirmLeaveRoom() { closeRoomManage(); openConfirmModal("방에서 완전히 나가시겠습니까?\n(재입장 시 코드가 필요합니다)", async () => { await supabaseClient.from('game_players').delete().eq('room_code', state.roomCode).eq('user_id', state.user.id); location.reload(); }); }
-        function confirmDeleteRoom() { closeRoomManage(); openConfirmModal("방을 폭파하시겠습니까?", async () => { await supabaseClient.from('game_rooms').delete().eq('room_code', state.roomCode); location.reload(); }); }
+        // 방 나가기 (소프트 삭제)
+        function confirmLeaveRoom() { 
+            openConfirmModal("방에서 나가시겠습니까?\n대시보드 '히스토리'에서 다시 입장할 수 있습니다.", async () => { 
+                await supabaseClient.from('game_players').update({ is_active: false, selected_slot: null, secret_number: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', state.user.id); 
+                location.reload(); 
+            }); 
+        }
+        
+        // 방 폭파 (하드 삭제 유지)
+        function confirmDeleteRoom() { closeRoomManage(); openConfirmModal("방을 완전히 삭제(폭파)하시겠습니까?\n모든 참여자가 튕겨나갑니다.", async () => { await supabaseClient.from('game_rooms').delete().eq('room_code', state.roomCode); location.reload(); }); }
         
         function openConfirmModal(m, a) { document.getElementById('confirm-message').innerText = m; const b = document.getElementById('btn-confirm-action'); const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.onclick = () => { closeConfirmModal(); a(); }; document.getElementById('modal-confirm').classList.remove('hidden'); }
         function closeConfirmModal() { document.getElementById('modal-confirm').classList.add('hidden'); }
 
-        // --- 숫자 가림막 제어 로직 (Pointer Events 적용) ---
-        let secretTimer = null;
-        
-        function showSecret() {
-            clearTimeout(secretTimer);
-            const num = document.getElementById('my-number');
-            const cover = document.getElementById('secret-cover');
-            if(num && cover) { num.style.opacity = '1'; cover.style.opacity = '0'; }
-        }
-        
-        function hideSecret() {
-            clearTimeout(secretTimer); // 중복 실행 방지
-            const num = document.getElementById('my-number');
-            const cover = document.getElementById('secret-cover');
-            if(num && cover) { num.style.opacity = '0'; cover.style.opacity = '1'; }
-        }
-        
-        function hideSecretDelay() {
-            clearTimeout(secretTimer);
-            // 터치를 떼면 무조건 2초 뒤에 가려짐
-            secretTimer = setTimeout(hideSecret, 2000); 
-        }
+        function showSecret() { clearTimeout(secretTimer); const n = document.getElementById('my-number'); const c = document.getElementById('secret-cover'); if(n && c) { n.style.opacity = '1'; c.style.opacity = '0'; } }
+        function hideSecret() { clearTimeout(secretTimer); const n = document.getElementById('my-number'); const c = document.getElementById('secret-cover'); if(n && c) { n.style.opacity = '0'; c.style.opacity = '1'; } }
+        function hideSecretDelay() { clearTimeout(secretTimer); secretTimer = setTimeout(hideSecret, 2000); }
     </script>
 </body>
 </html>
