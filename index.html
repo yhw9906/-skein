@@ -440,9 +440,22 @@
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
         function closeRoomManage() { document.getElementById('modal-room-manage').classList.add('hidden'); }
         async function handleShareRoom() { 
-            const t = `[마음의 실타래] 게임 초대\n방: ${state.roomData.room_name}\n코드: ${state.roomCode}\n접속: ${window.location.href}`;
-            if(navigator.share) await navigator.share({ text: t, url: window.location.href });
-            else { await navigator.clipboard.writeText(t); showToast("초대 복사 완료!"); }
+            // 요청하신 양식으로 텍스트 포맷을 변경했습니다.
+            const t = `마음의 실타래 : ${window.location.href}\n방 이름 : ${state.roomData.room_name}\n초대코드 : ${state.roomCode}`;
+            
+            try {
+                // 모바일 환경의 공유 창
+                if(navigator.share) {
+                    await navigator.share({ text: t }); 
+                } 
+                // PC 환경 등 클립보드 복사
+                else { 
+                    await navigator.clipboard.writeText(t); 
+                    showToast("초대 문구가 복사되었습니다!"); 
+                }
+            } catch (error) {
+                console.log("공유하기 취소 또는 오류:", error);
+            }
             closeRoomManage();
         }
         function openRenameModal() { closeRoomManage(); const n = prompt("새로운 방 이름을 입력하세요.", state.roomData.room_name); if(n) handleRenameRoom(n); }
