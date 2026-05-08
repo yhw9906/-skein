@@ -140,11 +140,16 @@
 
                 <div class="flex-shrink-0 bg-white pt-3 border-t border-slate-100 flex items-center gap-3">
                     
-                    <div id="my-secret-area" ontouchstart="" class="group relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer select-none overflow-hidden transition-all shadow-inner">
+                    <div id="my-secret-area" 
+                         onmouseenter="showSecret()" onmouseleave="hideSecret()"
+                         ontouchstart="showSecret()" ontouchend="hideSecretDelay()"
+                         oncontextmenu="event.preventDefault();"
+                         class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer select-none overflow-hidden transition-all shadow-inner">
+                        
                         <span class="text-[8px] md:text-[10px] font-bold text-slate-400 mb-0.5">내 숫자</span>
-                        <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100">?</span>
+                        <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 transition-opacity duration-200" style="opacity: 0;">?</span>
 
-                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 transition-opacity duration-200 group-hover:opacity-0 group-active:opacity-0">
+                        <div id="secret-cover" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 transition-opacity duration-200" style="opacity: 1;">
                             <span class="text-xl md:text-2xl">👀</span>
                             <span class="text-[8px] md:text-[9px] font-black text-slate-500 mt-1 tracking-widest">눌러서 확인</span>
                         </div>
@@ -180,7 +185,7 @@
         const supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         const COLORS = ["#EF4444", "#F97316", "#F59E0B", "#10B981", "#14B8A6", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899", "#64748B"];
         const state = { user: null, roomCode: null, roomData: null, players: [], myPlayerInfo: null };
-        let prevStatus = null; // 결과 스킵 방지를 위한 이전 상태 추적 변수
+        let prevStatus = null; 
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -314,7 +319,6 @@
                 </div>
             `).join('');
 
-            // 카드 슬롯 로직 (도트 겹침 방지 및 그리드 정렬 포함)
             const slotsCount = state.players.length;
             const slotsContainer = document.getElementById('card-slots');
             slotsContainer.innerHTML = "";
@@ -367,13 +371,11 @@
             if(state.myPlayerInfo?.is_ready) btnReady.classList.replace('bg-slate-800', 'bg-orange-500');
             else btnReady.classList.replace('bg-orange-500', 'bg-slate-800');
 
-            // 스킵 방지: 2초 딜레이
             const btnNext = document.getElementById('btn-next');
             if (state.roomData.status === 'revealed' && prevStatus === 'playing') {
                 btnNext.disabled = true;
                 btnNext.innerText = "결과 확인 중...";
                 btnNext.classList.add('opacity-40', 'cursor-not-allowed');
-                
                 setTimeout(() => {
                     btnNext.disabled = false;
                     btnNext.innerText = "다음 라운드 시작";
@@ -447,6 +449,27 @@
         function confirmDeleteRoom() { closeRoomManage(); openConfirmModal("방을 폭파하시겠습니까?", async () => { await supabaseClient.from('game_rooms').delete().eq('room_code', state.roomCode); location.reload(); }); }
         function openConfirmModal(m, a) { document.getElementById('confirm-message').innerText = m; const b = document.getElementById('btn-confirm-action'); const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.onclick = () => { closeConfirmModal(); a(); }; document.getElementById('modal-confirm').classList.remove('hidden'); }
         function closeConfirmModal() { document.getElementById('modal-confirm').classList.add('hidden'); }
+
+        // --- 숫자 가림막 제어 로직 (모바일 스킵/잔상 방지) ---
+        let secretTimer = null;
+        
+        function showSecret() {
+            clearTimeout(secretTimer);
+            const num = document.getElementById('my-number');
+            const cover = document.getElementById('secret-cover');
+            if(num && cover) { num.style.opacity = '1'; cover.style.opacity = '0'; }
+        }
+        
+        function hideSecret() {
+            const num = document.getElementById('my-number');
+            const cover = document.getElementById('secret-cover');
+            if(num && cover) { num.style.opacity = '0'; cover.style.opacity = '1'; }
+        }
+        
+        function hideSecretDelay() {
+            clearTimeout(secretTimer);
+            secretTimer = setTimeout(hideSecret, 2000); 
+        }
     </script>
 </body>
 </html>
