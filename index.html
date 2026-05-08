@@ -300,7 +300,7 @@
 
         function renderUI() {
             document.getElementById('room-info-display').innerText = `${state.roomData.room_name} | CODE: ${state.roomCode}`;
-            document.getElementById('display-theme').innerText = state.roomData.current_theme || "방장이 시작 버튼을 누르면 주제가 공개됩니다!";
+            document.getElementById('display-theme').innerText = state.roomData.current_theme || "시작 버튼을 누르면 주제가 공개됩니다!";
             
             document.getElementById('player-list').innerHTML = state.players.map(p => `
                 <div class="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-lg border border-slate-200">
