@@ -111,16 +111,18 @@
 
     <script>
         // ★ 본인의 Supabase 정보 입력 ★
-        const SUPABASE_URL = 'https://cqorkfocgpisqgsjxxbs.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_SNOSyYx-qg5RNgqkrUVRsQ_Ps9ShpTP';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = '본인의_URL';
+        const SUPABASE_ANON_KEY = '본인의_KEY';
+        
+        // 변수명 충돌을 피하기 위해 supabaseClient 로 변경했습니다.
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const COLORS = ["#EF4444", "#F97316", "#F59E0B", "#10B981", "#14B8A6", "#3B82F6", "#6366F1", "#8B5CF6", "#EC4899", "#64748B"];
         const state = { user: null, roomCode: null, roomData: null, players: [], selectedColor: null, myPlayerInfo: null };
 
         // --- 초기화 및 인증 ---
         window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 state.user = session.user;
                 document.getElementById('user-display').innerText = state.user.user_metadata.display_name;
@@ -135,32 +137,32 @@
             const nickname = document.getElementById('nickname').value;
 
             if (type === 'signup') {
-                const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: nickname } } });
-                if (error) return alert(error.message);
-                alert("가입 성공! 로그인 해주세요.");
+                const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { display_name: nickname } } });
+                if (error) return showToast(error.message);
+                showToast("가입 성공! 로그인 해주세요.");
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert("정보를 확인하세요.");
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) return showToast("정보를 확인하세요.");
                 location.reload();
             }
         }
 
-        async function handleLogout() { await supabase.auth.signOut(); location.reload(); }
+        async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
         // --- 방 로직 ---
         async function createRoom() {
             const name = document.getElementById('roomName').value;
             if(!name) return;
             const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-            await supabase.from('game_rooms').insert([{ room_code: code, room_name: name }]);
+            await supabaseClient.from('game_rooms').insert([{ room_code: code, room_name: name }]);
             state.roomCode = code;
             showColorSelect();
         }
 
         async function joinRoom() {
             const code = document.getElementById('joinCode').value.toUpperCase();
-            const { data } = await supabase.from('game_rooms').select('*').eq('room_code', code).single();
-            if(!data) return alert("없는 방입니다.");
+            const { data } = await supabaseClient.from('game_rooms').select('*').eq('room_code', code).single();
+            if(!data) return showToast("없는 방입니다.");
             state.roomCode = code;
             showColorSelect();
         }
@@ -170,8 +172,8 @@
             document.getElementById('color-section').classList.remove('hidden');
             
             // 이미 선택된 색상 확인
-            const { data: taken } = await supabase.from('game_players').select('color').eq('room_code', state.roomCode);
-            const takenColors = taken.map(p => p.color);
+            const { data: taken } = await supabaseClient.from('game_players').select('color').eq('room_code', state.roomCode);
+            const takenColors = taken ? taken.map(p => p.color) : [];
 
             const grid = document.getElementById('color-grid');
             grid.innerHTML = COLORS.map(c => {
@@ -183,14 +185,14 @@
         }
 
         async function selectColor(color) {
-            const { error } = await supabase.from('game_players').insert([{
+            const { error } = await supabaseClient.from('game_players').insert([{
                 room_code: state.roomCode,
                 user_id: state.user.id,
                 user_name: state.user.user_metadata.display_name,
                 color: color
             }]);
 
-            if(error) return alert("다른 색상을 선택하거나 다시 시도하세요.");
+            if(error) return showToast("다른 색상을 선택하거나 다시 시도하세요.");
             enterGame();
         }
 
@@ -206,7 +208,7 @@
         }
 
         function subscribeToGame() {
-            supabase.channel('game_realtime')
+            supabaseClient.channel('game_realtime')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: `room_code=eq.${state.roomCode}` }, refreshGame)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'game_players', filter: `room_code=eq.${state.roomCode}` }, refreshGame)
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_chat', filter: `room_code=eq.${state.roomCode}` }, (payload) => {
@@ -216,8 +218,8 @@
         }
 
         async function refreshGame() {
-            const { data: room } = await supabase.from('game_rooms').select('*').eq('room_code', state.roomCode).single();
-            const { data: players } = await supabase.from('game_players').select('*').eq('room_code', state.roomCode);
+            const { data: room } = await supabaseClient.from('game_rooms').select('*').eq('room_code', state.roomCode).single();
+            const { data: players } = await supabaseClient.from('game_players').select('*').eq('room_code', state.roomCode);
             
             state.roomData = room;
             state.players = players;
@@ -251,18 +253,15 @@
                 slot.className = "card-slot";
                 slot.onclick = () => selectSlot(i);
                 
-                // 해당 슬롯에 배치된 플레이어 찾기
                 const occupier = state.players.find(p => p.selected_slot === i);
                 if(occupier) {
                     if(state.roomData.status === 'revealed') {
-                        // 결과 공개 상태
                         slot.classList.add('revealed-card');
                         slot.innerHTML = `
                             <div class="text-2xl font-black text-slate-800">${occupier.secret_number}</div>
                             <div class="text-[10px] font-bold" style="color: ${occupier.color}">${occupier.user_name}</div>
                         `;
                     } else {
-                        // 카드 배치 중 상태 (도트 표시)
                         const dot = document.createElement('div');
                         dot.className = "player-dot";
                         dot.style.backgroundColor = occupier.color;
@@ -286,12 +285,10 @@
             document.getElementById('btn-ready').classList.toggle('hidden', state.roomData.status !== 'playing');
             document.getElementById('btn-next').classList.toggle('hidden', state.roomData.status !== 'revealed');
             
-            // 모든 플레이어가 카드를 하나씩 겹치지 않게 놓았을 때만 확정 가능
             const isAllPlaced = state.players.every(p => p.selected_slot != null);
             document.getElementById('btn-ready').disabled = !isAllPlaced || hasConflict;
             document.getElementById('btn-ready').style.opacity = (!isAllPlaced || hasConflict) ? "0.5" : "1";
 
-            // 모든 플레이어가 확정하면 자동으로 'revealed'로 상태 변경
             if(state.roomData.status === 'playing' && isAllReady) {
                 updateRoomStatus('revealed');
             }
@@ -300,17 +297,21 @@
         // --- 게임 액션 ---
         async function startGame() {
             // 주제 가져오기
-            const { data: themes } = await supabase.from('game_themes').select('content');
-            const randomTheme = themes[Math.floor(Math.random() * themes.length)].content;
+            const { data: themes } = await supabaseClient.from('game_themes').select('content');
+            
+            // 만약 DB에 주제가 없다면 기본값 사용
+            const randomTheme = (themes && themes.length > 0) 
+                ? themes[Math.floor(Math.random() * themes.length)].content 
+                : "세상에서 가장 무서운 것은?";
 
-            // 숫자 배분 (중복 없이)
+            // 숫자 배분
             const numbers = Array.from({length: 100}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
             
             showLoading(true);
-            await supabase.from('game_rooms').update({ current_theme: randomTheme, status: 'playing' }).eq('room_code', state.roomCode);
+            await supabaseClient.from('game_rooms').update({ current_theme: randomTheme, status: 'playing' }).eq('room_code', state.roomCode);
             
             for(let i=0; i < state.players.length; i++) {
-                await supabase.from('game_players').update({ 
+                await supabaseClient.from('game_players').update({ 
                     secret_number: numbers[i], 
                     selected_slot: null, 
                     is_ready: false 
@@ -321,20 +322,20 @@
 
         async function selectSlot(slotNum) {
             if(state.roomData.status !== 'playing' || state.myPlayerInfo.is_ready) return;
-            await supabase.from('game_players').update({ selected_slot: slotNum }).eq('room_code', state.roomCode).eq('user_id', state.user.id);
+            await supabaseClient.from('game_players').update({ selected_slot: slotNum }).eq('room_code', state.roomCode).eq('user_id', state.user.id);
         }
 
         async function toggleReady() {
             const newState = !state.myPlayerInfo.is_ready;
-            await supabase.from('game_players').update({ is_ready: newState }).eq('room_code', state.roomCode).eq('user_id', state.user.id);
+            await supabaseClient.from('game_players').update({ is_ready: newState }).eq('room_code', state.roomCode).eq('user_id', state.user.id);
         }
 
         async function updateRoomStatus(status) {
-            await supabase.from('game_rooms').update({ status: status }).eq('room_code', state.roomCode);
+            await supabaseClient.from('game_rooms').update({ status: status }).eq('room_code', state.roomCode);
         }
 
         async function nextRound() {
-            await supabase.from('game_rooms').update({ status: 'waiting', current_theme: "다음 게임 준비 중..." }).eq('room_code', state.roomCode);
+            await supabaseClient.from('game_rooms').update({ status: 'waiting', current_theme: "다음 게임 준비 중..." }).eq('room_code', state.roomCode);
             startGame();
         }
 
@@ -344,7 +345,7 @@
             const msg = input.value.trim();
             if(!msg) return;
             input.value = "";
-            await supabase.from('game_chat').insert([{
+            await supabaseClient.from('game_chat').insert([{
                 room_code: state.roomCode,
                 user_name: state.user.user_metadata.display_name,
                 color: state.myPlayerInfo.color,
@@ -361,7 +362,7 @@
                         <div class="chat-dot" style="background-color: ${chat.color}"></div>
                         <span class="text-slate-400">${chat.user_name}</span>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border text-sm text-slate-700 w-fit max-w-[80%]">
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border text-sm text-slate-700 w-fit max-w-[80%] break-all">
                         ${chat.message}
                     </div>
                 </div>
@@ -370,7 +371,17 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function showLoading(show) { document.getElementById('loading').classList.toggle('hidden', !show); }
+        function showLoading(show) { 
+            const loader = document.getElementById('loading');
+            if(loader) loader.classList.toggle('hidden', !show); 
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg; 
+            toast.classList.remove('opacity-0', '-translate-y-5');
+            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-5'), 2500);
+        }
     </script>
 </body>
 </html>
