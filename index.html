@@ -63,6 +63,17 @@
         </div>
     </div>
 
+    <div id="modal-profile" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[240] p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+            <h2 class="font-black text-lg mb-4">닉네임 변경</h2>
+            <input type="text" id="profileNameInput" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none font-bold mb-4" placeholder="새 닉네임 입력">
+            <div class="flex gap-2">
+                <button onclick="closeProfileModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold">취소</button>
+                <button onclick="handleUpdateProfile()" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold">변경</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-confirm" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[230] p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center">
             <p id="confirm-message" class="mb-6 font-bold text-slate-700 whitespace-pre-line"></p>
@@ -74,7 +85,8 @@
     </div>
 
     <div class="w-full max-w-5xl bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[100dvh] md:h-[800px]">
-        <div class="flex-1 p-4 md:p-6 flex flex-col relative overflow-hidden bg-white h-[55%] md:h-full">
+        
+        <div class="flex-1 p-4 md:p-6 flex flex-col relative overflow-hidden bg-white h-[40%] md:h-full">
             <div class="flex justify-between items-start mb-4 flex-shrink-0">
                 <div>
                     <h1 class="text-xl md:text-3xl font-black text-indigo-600 tracking-tighter cursor-pointer" onclick="location.reload()">마음의 실타래</h1>
@@ -111,7 +123,10 @@
 
             <div id="screen-dashboard" class="hidden space-y-6 my-auto max-w-sm mx-auto w-full overflow-y-auto no-scrollbar pb-10">
                 <div class="flex justify-between items-center bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                    <span id="user-display" class="font-bold text-indigo-600"></span>
+                    <div class="flex items-center gap-2">
+                        <span id="user-display" class="font-bold text-indigo-600"></span>
+                        <button onclick="openProfileModal()" class="text-[10px] bg-indigo-200 text-indigo-700 px-2 py-1 rounded-lg font-bold shadow-sm hover:bg-indigo-300">수정</button>
+                    </div>
                     <button onclick="handleLogout()" class="text-xs text-slate-400 font-bold underline">로그아웃</button>
                 </div>
                 
@@ -142,49 +157,49 @@
             </div>
 
             <div id="screen-game" class="hidden flex-col h-full overflow-hidden w-full max-w-2xl mx-auto">
-                <div class="bg-indigo-600 text-white p-4 md:p-6 rounded-2xl mb-3 shadow-md flex-shrink-0 relative overflow-hidden">
+                <div class="bg-indigo-600 text-white p-3 md:p-6 rounded-2xl mb-2 shadow-md flex-shrink-0 relative overflow-hidden">
                     <p class="text-[9px] md:text-[10px] font-bold opacity-70 mb-0.5 uppercase tracking-widest">라운드 주제</p>
-                    <h2 id="display-theme" class="text-base md:text-xl font-black leading-tight break-keep">대기 중...</h2>
+                    <h2 id="display-theme" class="text-sm md:text-xl font-black leading-tight break-keep">대기 중...</h2>
                     <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white opacity-10 rounded-full"></div>
                 </div>
                 <div class="flex-1 overflow-y-auto no-scrollbar pb-2 w-full">
                     <div id="card-slots" class="flex flex-wrap justify-center gap-2 md:gap-4 px-1"></div>
                 </div>
-                <div class="flex-shrink-0 bg-white pt-3 border-t border-slate-100 flex items-center gap-3">
+                <div class="flex-shrink-0 bg-white pt-2 border-t border-slate-100 flex items-center gap-3">
                     <div id="my-secret-area" 
                          onpointerdown="showSecret()" 
                          onpointerup="hideSecretDelay()"
                          onpointerleave="hideSecret()"
                          oncontextmenu="event.preventDefault();"
                          style="touch-action: none; -webkit-user-select: none; user-select: none;"
-                         class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-2 min-w-[80px] md:min-w-[100px] cursor-pointer overflow-hidden transition-all shadow-inner">
+                         class="relative flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl px-4 py-1.5 min-w-[70px] md:min-w-[100px] cursor-pointer overflow-hidden transition-all shadow-inner">
                         <span class="text-[8px] md:text-[10px] font-bold text-slate-400 mb-0.5">내 숫자</span>
-                        <span id="my-number" class="text-2xl md:text-3xl font-black text-indigo-600 transition-opacity duration-200" style="opacity: 0;">?</span>
+                        <span id="my-number" class="text-xl md:text-3xl font-black text-indigo-600 transition-opacity duration-200" style="opacity: 0;">?</span>
                         <div id="secret-cover" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-200 transition-opacity duration-200" style="opacity: 1;">
-                            <span class="text-xl md:text-2xl">👀</span>
-                            <span class="text-[8px] md:text-[9px] font-black text-slate-500 mt-1 tracking-widest">눌러서 확인</span>
+                            <span class="text-lg md:text-2xl">👀</span>
+                            <span class="text-[8px] md:text-[9px] font-black text-slate-500 mt-0.5 tracking-widest">확인</span>
                         </div>
                     </div>
-                    <div class="flex-1">
-                        <button id="btn-start" onclick="startGame()" class="w-full bg-indigo-600 text-white py-4 md:py-5 rounded-xl font-black shadow-md hidden">게임 시작</button>
-                        <button id="btn-ready" onclick="toggleReady()" class="w-full bg-slate-800 text-white py-4 md:py-5 rounded-xl font-black shadow-md hidden transition-all duration-200">카드 배치 확정</button>
-                        <button id="btn-next" onclick="nextRound()" class="w-full bg-emerald-500 text-white py-4 md:py-5 rounded-xl font-black shadow-md hidden transition-all duration-200">다음 라운드 시작</button>
+                    <div class="flex-1 relative">
+                        <button id="btn-start" onclick="startGame()" class="w-full bg-indigo-600 text-white py-3 md:py-5 rounded-xl font-black shadow-md hidden disabled:opacity-50">게임 시작</button>
+                        <button id="btn-ready" onclick="toggleReady()" class="w-full bg-slate-800 text-white py-3 md:py-5 rounded-xl font-black shadow-md hidden transition-all duration-200 disabled:opacity-50">배치 확정</button>
+                        <button id="btn-next" onclick="nextRound()" class="w-full bg-emerald-500 text-white py-3 md:py-5 rounded-xl font-black shadow-md hidden transition-all duration-200 disabled:opacity-50">다음 시작</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="side-panel" class="hidden h-[45%] md:h-full md:w-80 bg-slate-50 border-t-2 md:border-t-0 md:border-l-2 border-slate-100 flex flex-col z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] md:shadow-none">
+        <div id="side-panel" class="hidden h-[60%] md:h-full md:w-96 bg-slate-50 border-t-2 md:border-t-0 md:border-l-2 border-slate-100 flex flex-col z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] md:shadow-none">
             <div class="p-3 md:p-5 border-b border-slate-200 bg-white flex-shrink-0">
                 <h3 class="font-bold text-slate-400 text-[9px] md:text-[10px] uppercase tracking-widest mb-2">참여자 목록</h3>
                 <div id="player-list" class="flex flex-wrap gap-1.5"></div>
             </div>
             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar bg-slate-50"></div>
             <div class="p-3 bg-white border-t border-slate-200 flex-shrink-0 pb-safe">
-                <div class="flex gap-2">
-                    <input type="text" id="chat-input" placeholder="채팅을 입력하세요..." class="flex-1 p-3 bg-slate-100 rounded-xl outline-none text-xs md:text-sm font-medium border-none" onkeypress="if(event.keyCode==13) sendChat()">
-                    <button onclick="sendChat()" class="bg-indigo-600 text-white px-4 md:px-5 rounded-xl font-black shadow-sm">↑</button>
-                </div>
+                <form onsubmit="handleChatSubmit(event)" class="flex gap-2 m-0">
+                    <input type="text" id="chat-input" placeholder="채팅을 입력하세요..." autocomplete="off" class="flex-1 p-3 bg-slate-100 rounded-xl outline-none text-xs md:text-sm font-medium border-none">
+                    <button type="submit" class="bg-indigo-600 text-white px-4 md:px-5 rounded-xl font-black shadow-sm">↑</button>
+                </form>
             </div>
         </div>
     </div>
@@ -246,7 +261,26 @@
         }
         async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
-        // --- 대시보드 리스트 생성 ---
+        // --- 프로필 수정 기능 ---
+        function openProfileModal() {
+            document.getElementById('profileNameInput').value = state.user.user_metadata.display_name || "";
+            document.getElementById('modal-profile').classList.remove('hidden');
+        }
+        function closeProfileModal() { document.getElementById('modal-profile').classList.add('hidden'); }
+        async function handleUpdateProfile() {
+            const n = document.getElementById('profileNameInput').value.trim();
+            if(!n) return;
+            showLoading(true);
+            await supabaseClient.auth.updateUser({ data: { display_name: n } });
+            await supabaseClient.from('game_players').update({ user_name: n }).eq('user_id', state.user.id);
+            state.user.user_metadata.display_name = n;
+            document.getElementById('user-display').innerText = n;
+            showToast("닉네임 변경 완료");
+            closeProfileModal();
+            showLoading(false);
+            if(state.roomCode) refreshGame();
+        }
+
         function createGameListItem(i, isActive) {
             return `
                 <div onclick="joinRoom('${i.room_code}')" class="p-3 bg-white border border-slate-200 rounded-xl flex justify-between items-center cursor-pointer hover:border-indigo-500 shadow-sm transition-all group ${isActive ? '' : 'opacity-60'}">
@@ -267,8 +301,8 @@
             const activeList = document.getElementById('my-game-list');
             const historyList = document.getElementById('my-history-list');
             
-            const validData = data ? data.filter(i => i.game_rooms !== null) : []; // 폭파된 방 제외
-            const activeData = validData.filter(i => i.is_active !== false); // true 거나 null(과거데이터)인 경우
+            const validData = data ? data.filter(i => i.game_rooms !== null) : [];
+            const activeData = validData.filter(i => i.is_active !== false);
             const historyData = validData.filter(i => i.is_active === false);
 
             activeList.innerHTML = activeData.length ? activeData.map(i => createGameListItem(i, true)).join('') : `<p class="text-center py-5 text-xs text-slate-300 font-bold bg-slate-50 rounded-2xl">참여 중인 게임이 없습니다.</p>`;
@@ -283,7 +317,6 @@
             state.roomCode = code; showColorSelect();
         }
 
-        // 재입장 및 신규 입장 통합 처리
         async function joinRoom(targetCode) {
             const code = (typeof targetCode === 'string' ? targetCode : document.getElementById('joinCode').value.trim()).toUpperCase();
             if(!code) return;
@@ -291,7 +324,6 @@
             const { data: exists } = await supabaseClient.from('game_players').select('*').eq('room_code', code).eq('user_id', state.user.id).single();
             if(exists) {
                 if(exists.is_active === false) {
-                    // 나갔던 방에 재입장 시 is_active를 다시 true로 업데이트
                     await supabaseClient.from('game_players').update({ is_active: true }).eq('room_code', code).eq('user_id', state.user.id);
                 }
                 return enterGame(code);
@@ -312,11 +344,7 @@
 
         async function selectColor(color) {
             const { error } = await supabaseClient.from('game_players').insert([{ 
-                room_code: state.roomCode, 
-                user_id: state.user.id, 
-                user_name: state.user.user_metadata.display_name, 
-                color: color,
-                is_active: true // 최초 가입 시 활성화
+                room_code: state.roomCode, user_id: state.user.id, user_name: state.user.user_metadata.display_name, color: color, is_active: true 
             }]);
             if(error) return showToast("다른 색상을 선택하세요.");
             enterGame(state.roomCode);
@@ -337,13 +365,21 @@
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_chat', filter: `room_code=eq.${code}` }, (p) => appendChatMessage(p.new))
                 .subscribe();
             
+            await loadChatHistory(code);
             refreshGame();
         }
 
+        async function loadChatHistory(code) {
+            const { data } = await supabaseClient.from('game_chat').select('*').eq('room_code', code).order('id', { ascending: true });
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = '';
+            if (data) data.forEach(c => appendChatMessage(c));
+        }
+
         async function refreshGame() {
+            // 안정성: DB에서 가장 최신 방 정보와 참여중(is_active)인 인원만 확실히 불러옵니다.
             const { data: room } = await supabaseClient.from('game_rooms').select('*').eq('room_code', state.roomCode).single();
             if(!room) return location.reload();
-            // 활성화된(참여 중인) 플레이어만 필터링해서 가져옴
             const { data: players } = await supabaseClient.from('game_players').select('*').eq('room_code', state.roomCode).eq('is_active', true).order('user_name');
             state.roomData = room; state.players = players;
             state.myPlayerInfo = players.find(p => p.user_id === state.user.id);
@@ -393,8 +429,8 @@
 
             document.getElementById('my-number').innerText = state.myPlayerInfo?.secret_number || "?";
 
-            const isAllPlaced = state.players.every(p => p.selected_slot != null);
-            const isAllReady = state.players.every(p => p.is_ready) && state.players.length > 1;
+            const isAllPlaced = state.players.length > 0 && state.players.every(p => p.selected_slot != null);
+            const isAllReady = state.players.length > 1 && state.players.every(p => p.is_ready);
             const hasConflict = new Set(state.players.map(p => p.selected_slot).filter(s => s != null)).size !== state.players.filter(p => p.selected_slot != null).length;
 
             document.getElementById('btn-start').classList.toggle('hidden', state.roomData.status !== 'waiting');
@@ -404,51 +440,77 @@
             const btnReady = document.getElementById('btn-ready');
             btnReady.innerText = state.myPlayerInfo?.is_ready ? "확정 취소" : "카드 배치 확정";
             btnReady.disabled = !isAllPlaced || hasConflict;
-            btnReady.style.opacity = (!isAllPlaced || hasConflict) ? "0.3" : "1";
+            
             if(state.myPlayerInfo?.is_ready) btnReady.classList.replace('bg-slate-800', 'bg-orange-500');
             else btnReady.classList.replace('bg-orange-500', 'bg-slate-800');
 
             const btnNext = document.getElementById('btn-next');
             if (state.roomData.status === 'revealed' && prevStatus === 'playing') {
-                btnNext.disabled = true; btnNext.innerText = "결과 확인 중..."; btnNext.classList.add('opacity-40', 'cursor-not-allowed');
-                setTimeout(() => { btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; btnNext.classList.remove('opacity-40', 'cursor-not-allowed'); }, 2000);
+                btnNext.disabled = true; btnNext.innerText = "결과 확인 중..."; 
+                setTimeout(() => { btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; }, 2000);
             } else if (state.roomData.status === 'revealed') {
-                btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; btnNext.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnNext.disabled = false; btnNext.innerText = "다음 라운드 시작"; 
             }
             if(state.roomData.status === 'playing' && isAllReady) updateRoomStatus('revealed');
             prevStatus = state.roomData.status;
         }
 
+        // --- 안정성 패치: 게임 시작 ---
         async function startGame() {
+            const btnStart = document.getElementById('btn-start');
+            btnStart.disabled = true; // 연타 방지
+            showLoading(true);
+
+            // DB에서 현재 참가중인 최신 플레이어 목록 직접 획득 (네트워크 지연 방어)
+            const { data: currentPlayers, error: fetchErr } = await supabaseClient.from('game_players').select('*').eq('room_code', state.roomCode).eq('is_active', true);
+            if (fetchErr || !currentPlayers || currentPlayers.length === 0) {
+                showLoading(false); btnStart.disabled = false; return showToast("오류: 최신 참가자 정보를 불러오지 못했습니다.");
+            }
+
             const { data: themes } = await supabaseClient.from('game_themes').select('content');
             const theme = (themes && themes.length) ? themes[Math.floor(Math.random() * themes.length)].content : "우리가 함께 가고 싶은 여행지는?";
             const nums = Array.from({length: 100}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-            showLoading(true);
+            
             const { error: roomError } = await supabaseClient.from('game_rooms').update({ current_theme: theme, status: 'playing' }).eq('room_code', state.roomCode);
-            if (roomError) { showLoading(false); return showToast("권한이 없습니다."); }
-            for(let i=0; i < state.players.length; i++) {
-                await supabaseClient.from('game_players').update({ secret_number: nums[i], selected_slot: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', state.players[i].user_id);
+            if (roomError) { showLoading(false); btnStart.disabled = false; return showToast("권한이 없습니다."); }
+            
+            let isSuccess = true;
+            for(let i=0; i < currentPlayers.length; i++) {
+                const { error } = await supabaseClient.from('game_players').update({ secret_number: nums[i], selected_slot: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', currentPlayers[i].user_id);
+                if (error) isSuccess = false;
             }
-            showLoading(false); await refreshGame();
+            
+            showLoading(false);
+            btnStart.disabled = false;
+            if (!isSuccess) showToast("숫자 배분 중 오류가 발생했습니다.");
+            else await refreshGame();
         }
 
-        function confirmRestartGame() { openConfirmModal("게임이 초기화 됩니다.\n정말 강제 재시작 하시겠습니까?", handleRestartGame); }
+        function confirmRestartGame() { openConfirmModal("게임이 초기화 됩니다.\n(채팅 내역도 모두 삭제됩니다)\n정말 강제 재시작 하시겠습니까?", handleRestartGame); }
         async function handleRestartGame() {
             showLoading(true);
             await supabaseClient.from('game_rooms').update({ status: 'waiting', current_theme: '새로운 게임 준비 중...' }).eq('room_code', state.roomCode);
             await supabaseClient.from('game_players').update({ secret_number: null, selected_slot: null, is_ready: false }).eq('room_code', state.roomCode);
+            await supabaseClient.from('game_chat').delete().eq('room_code', state.roomCode);
+            document.getElementById('chat-messages').innerHTML = ''; 
             showLoading(false); showToast("초기화 완료");
         }
 
-        async function selectSlot(n) { if(state.roomData.status !== 'playing' || state.myPlayerInfo.is_ready) return; await supabaseClient.from('game_players').update({ selected_slot: n }).eq('room_code', state.roomCode).eq('user_id', state.user.id); }
-        async function toggleReady() { await supabaseClient.from('game_players').update({ is_ready: !state.myPlayerInfo.is_ready }).eq('room_code', state.roomCode).eq('user_id', state.user.id); }
-        async function updateRoomStatus(s) { await supabaseClient.from('game_rooms').update({ status: s }).eq('room_code', state.roomCode); }
-        async function nextRound() { await supabaseClient.from('game_rooms').update({ status: 'waiting', current_theme: "다음 라운드 대기 중..." }).eq('room_code', state.roomCode); startGame(); }
-        
-        async function sendChat() {
-            const i = document.getElementById('chat-input'); const m = i.value.trim(); if(!m) return; i.value = "";
-            await supabaseClient.from('game_chat').insert([{ room_code: state.roomCode, user_name: state.user.user_metadata.display_name, color: state.myPlayerInfo.color, message: m }]);
+        async function selectSlot(n) { if(state.roomData.status !== 'playing' || state.myPlayerInfo?.is_ready) return; await supabaseClient.from('game_players').update({ selected_slot: n }).eq('room_code', state.roomCode).eq('user_id', state.user.id); }
+        async function toggleReady() { 
+            document.getElementById('btn-ready').disabled = true; // 연타 방어
+            await supabaseClient.from('game_players').update({ is_ready: !state.myPlayerInfo.is_ready }).eq('room_code', state.roomCode).eq('user_id', state.user.id); 
         }
+        async function updateRoomStatus(s) { await supabaseClient.from('game_rooms').update({ status: s }).eq('room_code', state.roomCode); }
+        async function nextRound() { document.getElementById('btn-next').disabled = true; await supabaseClient.from('game_rooms').update({ status: 'waiting', current_theme: "다음 라운드 대기 중..." }).eq('room_code', state.roomCode); startGame(); }
+        
+        async function handleChatSubmit(e) {
+            e.preventDefault(); 
+            const i = document.getElementById('chat-input'); const m = i.value.trim(); if(!m) return; i.value = "";
+            i.focus(); // 모바일 키보드 유지
+            await supabaseClient.from('game_chat').insert([{ room_code: state.roomCode, user_name: state.user.user_metadata.display_name, color: state.myPlayerInfo?.color || '#333', message: m }]);
+        }
+
         function appendChatMessage(c) {
             const box = document.getElementById('chat-messages'); const isMe = c.user_name === state.user.user_metadata.display_name;
             const d = document.createElement('div'); d.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
@@ -456,7 +518,6 @@
             box.appendChild(d); box.scrollTop = box.scrollHeight;
         }
 
-        // --- 멤버 관리 기능 ---
         function openMemberManage() {
             closeRoomManage();
             const list = document.getElementById('member-manage-list');
@@ -475,19 +536,12 @@
             document.getElementById('modal-member-list').classList.remove('hidden');
         }
         function closeMemberManage() { document.getElementById('modal-member-list').classList.add('hidden'); }
-
-        function confirmKickMember(id, name) {
-            openConfirmModal(`[${name}]님을 정말 내보내시겠습니까?\n인원 변동으로 인해 게임이 즉시 초기화됩니다.`, () => handleKickMember(id));
-        }
-
+        function confirmKickMember(id, name) { openConfirmModal(`[${name}]님을 정말 내보내시겠습니까?\n인원 변동으로 인해 게임이 즉시 초기화됩니다.`, () => handleKickMember(id)); }
         async function handleKickMember(id) {
             showLoading(true);
-            // 소프트 삭제: is_active 상태를 false로 변경하고 게임 데이터 초기화
             await supabaseClient.from('game_players').update({ is_active: false, selected_slot: null, secret_number: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', id);
             await handleRestartGame();
-            showLoading(false);
-            showToast("멤버를 내보내고 게임을 초기화했습니다.");
-            closeMemberManage();
+            showLoading(false); showToast("멤버를 내보내고 게임을 초기화했습니다."); closeMemberManage();
         }
 
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
@@ -506,17 +560,13 @@
             showToast("이름 변경 완료"); closeRenameModal();
         }
         
-        // 방 나가기 (소프트 삭제)
         function confirmLeaveRoom() { 
             openConfirmModal("방에서 나가시겠습니까?\n대시보드 '히스토리'에서 다시 입장할 수 있습니다.", async () => { 
                 await supabaseClient.from('game_players').update({ is_active: false, selected_slot: null, secret_number: null, is_ready: false }).eq('room_code', state.roomCode).eq('user_id', state.user.id); 
                 location.reload(); 
             }); 
         }
-        
-        // 방 폭파 (하드 삭제 유지)
         function confirmDeleteRoom() { closeRoomManage(); openConfirmModal("방을 완전히 삭제(폭파)하시겠습니까?\n모든 참여자가 튕겨나갑니다.", async () => { await supabaseClient.from('game_rooms').delete().eq('room_code', state.roomCode); location.reload(); }); }
-        
         function openConfirmModal(m, a) { document.getElementById('confirm-message').innerText = m; const b = document.getElementById('btn-confirm-action'); const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.onclick = () => { closeConfirmModal(); a(); }; document.getElementById('modal-confirm').classList.remove('hidden'); }
         function closeConfirmModal() { document.getElementById('modal-confirm').classList.add('hidden'); }
 
