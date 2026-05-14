@@ -567,11 +567,56 @@
 
         function openRoomManage() { document.getElementById('modal-room-manage').classList.remove('hidden'); }
         function closeRoomManage() { document.getElementById('modal-room-manage').classList.add('hidden'); }
+        // --- 초대 링크 공유 로직 (PC/모바일 완벽 호환 및 강제 복사 폴백) ---
         async function handleShareRoom() { 
             const t = `[마음의 실타래] 게임 초대\n방: ${state.roomData.room_name}\n코드: ${state.roomCode}\n접속: ${window.location.href}`;
-            if(navigator.share) await navigator.share({ text: t, url: window.location.href });
-            else { await navigator.clipboard.writeText(t); showToast("초대 복사 완료!"); }
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            try {
+                // 모바일 환경이면서 share API를 지원할 때만 기본 공유창 띄우기
+                if (isMobile && navigator.share) {
+                    await navigator.share({ text: t });
+                } else {
+                    // PC 환경이거나 share 미지원 시 무조건 클립보드 복사
+                    await copyToClipboard(t);
+                }
+            } catch (e) {
+                // 사용자가 공유를 취소하거나 에러가 났을 때도 클립보드 복사로 백업
+                await copyToClipboard(t);
+            }
             closeRoomManage();
+        }
+
+        // 강력한 클립보드 복사 함수 (HTTPS, HTTP 모두 작동)
+        async function copyToClipboard(text) {
+            // 최신 클립보드 API가 지원되는 경우
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast("초대 링크가 복사되었습니다!");
+                    return;
+                } catch (err) {
+                    console.warn("최신 복사 실패, 구형 방식으로 재시도합니다.");
+                }
+            }
+            
+            // 최신 API가 실패하거나 지원하지 않는 경우 (방탄 폴백)
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // 화면 스크롤 방지
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast("초대 링크가 복사되었습니다!");
+            } catch (err) {
+                showToast("복사에 실패했습니다. 직접 드래그해서 복사해주세요.");
+            }
+            document.body.removeChild(textArea);
         }
         function openRenameModal() { closeRoomManage(); document.getElementById('renameInput').value = state.roomData.room_name; document.getElementById('modal-rename').classList.remove('hidden'); }
         function closeRenameModal() { document.getElementById('modal-rename').classList.add('hidden'); }
